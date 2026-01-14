@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mocks dos UseCases
 class MockGetSubscriptions extends Mock implements GetSubscriptions {}
 
 class MockGetSubscriptionBySlug extends Mock implements GetSubscriptionBySlug {}
@@ -33,7 +32,6 @@ void main() {
     bloc.close();
   });
 
-  // Test data
   final testSubscriptions = [
     Subscription.fake(slug: 'sub-1', name: 'Assinatura 1'),
     Subscription.fake(slug: 'sub-2', name: 'Assinatura 2'),
@@ -105,8 +103,9 @@ void main() {
           ).thenAnswer((_) async => Right(testSubscription));
           return bloc;
         },
-        act: (bloc) =>
-            bloc.add(const LoadSubscriptionDetail(slug: 'empiricus-investidor')),
+        act: (bloc) => bloc.add(
+          const LoadSubscriptionDetail(slug: 'empiricus-investidor'),
+        ),
         expect: () => [
           const SubscriptionLoading(),
           SubscriptionDetailLoaded(testSubscription),
@@ -119,12 +118,13 @@ void main() {
       blocTest<SubscriptionBloc, SubscriptionState>(
         'emits [SubscriptionLoading, SubscriptionError] when NotFoundFailure',
         build: () {
-          when(() => getSubscriptionBySlug(any())).thenAnswer(
-            (_) async => const Left(NotFoundFailure()),
-          );
+          when(
+            () => getSubscriptionBySlug(any()),
+          ).thenAnswer((_) async => const Left(NotFoundFailure()));
           return bloc;
         },
-        act: (bloc) => bloc.add(const LoadSubscriptionDetail(slug: 'non-existent')),
+        act: (bloc) =>
+            bloc.add(const LoadSubscriptionDetail(slug: 'non-existent')),
         expect: () => [const SubscriptionLoading(), isA<SubscriptionError>()],
       );
     });
@@ -139,10 +139,7 @@ void main() {
           return bloc;
         },
         act: (bloc) => bloc.add(const RefreshSubscriptions()),
-        expect: () => [
-          // Note: No SubscriptionLoading - this is intentional for pull-to-refresh
-          SubscriptionLoaded(testSubscriptions),
-        ],
+        expect: () => [SubscriptionLoaded(testSubscriptions)],
       );
     });
   });

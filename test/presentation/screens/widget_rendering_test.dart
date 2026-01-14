@@ -21,7 +21,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Mocks para os BLoCs
 class MockAuthBloc extends Mock implements AuthBloc {}
 
 class MockSubscriptionBloc extends Mock implements SubscriptionBloc {}
@@ -33,7 +32,6 @@ void main() {
   late List<Subscription> fakeSubscriptions;
 
   setUpAll(() {
-    // Registra os fallbacks para any<T>() que são usados em verify
     registerFallbackValue(const LoadSubscriptions());
     registerFallbackValue(const LoadSubscriptionDetail(slug: 'any'));
   });
@@ -42,7 +40,6 @@ void main() {
     authBloc = MockAuthBloc();
     subscriptionBloc = MockSubscriptionBloc();
 
-    // Desregistra e registra os mocks como SINGLETONS no GetIt.
     if (getIt.isRegistered<AuthBloc>()) {
       getIt.unregister<AuthBloc>();
     }
@@ -52,11 +49,9 @@ void main() {
     getIt.registerSingleton<AuthBloc>(authBloc);
     getIt.registerSingleton<SubscriptionBloc>(subscriptionBloc);
 
-    // Mocka o close() dos BLoCs para evitar erros de dispose
     when(() => authBloc.close()).thenAnswer((_) async {});
     when(() => subscriptionBloc.close()).thenAnswer((_) async {});
 
-    // Dados de teste
     fakeSubscription = Subscription.fake(
       slug: 'vacas-leiteiras',
       name: 'Vacas Leiteiras: Oportunidades no Agronegócio',
@@ -87,7 +82,6 @@ void main() {
       Subscription.fake(slug: 'cafe-premium', name: 'Café Premium'),
     ];
 
-    // Ajusta o tamanho da janela do teste para Flutter 3.9+
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     binding.platformDispatcher.views.first.physicalSize = const Size(
       1200,
@@ -97,19 +91,14 @@ void main() {
   });
 
   tearDown(() {
-    // Limpa o tamanho da janela do teste
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     binding.platformDispatcher.views.first.resetPhysicalSize();
     binding.platformDispatcher.views.first.resetDevicePixelRatio();
 
-    // Garante que os BLoCs sejam fechados após cada teste
     authBloc.close();
     subscriptionBloc.close();
   });
 
-  /// Widget auxiliar para construir o app de teste
-  /// Este builder é mais simples, focado em montar um widget específico
-  /// sem a complexidade do GoRouter para navegação inicial.
   Widget buildTestApp(Widget child) {
     return MultiBlocProvider(
       providers: [
@@ -118,7 +107,7 @@ void main() {
       ],
       child: MaterialApp(
         home: child,
-        // Adiciona um ScaffoldMessenger para que SnackBar possa ser exibido
+
         builder: (context, child) {
           return ScaffoldMessenger(child: child!);
         },
@@ -127,13 +116,7 @@ void main() {
   }
 
   group('Widget Rendering Tests', () {
-    // =======================================================================
-    // 1. SubscriptionsScreen (Lista de Assinaturas)
-    // =======================================================================
     group('SubscriptionsScreen', () {
-
-
-
       testWidgets('should display LoadingWidget while loading subscriptions', (
         tester,
       ) async {
@@ -161,7 +144,6 @@ void main() {
       testWidgets('should display a list of subscriptions when loaded', (
         tester,
       ) async {
-        // Configura o AuthBloc para estar autenticado
         when(
           () => authBloc.state,
         ).thenReturn(const AuthSuccess(userEmail: 'test@emp.com'));
@@ -170,7 +152,6 @@ void main() {
           Stream.value(const AuthSuccess(userEmail: 'test@emp.com')),
         );
 
-        // Configura o SubscriptionBloc para emitir SubscriptionLoaded
         when(
           () => subscriptionBloc.state,
         ).thenReturn(const SubscriptionInitial());
@@ -184,13 +165,10 @@ void main() {
         );
 
         await tester.pumpWidget(buildTestApp(const SubscriptionsScreen()));
-        await tester
-            .pumpAndSettle(); // Aguarda o BLoC carregar e a UI estabilizar
+        await tester.pumpAndSettle();
 
-        // Verifica se a AppBar com o título "Assinaturas" está presente
         expect(find.text('Assinaturas'), findsOneWidget);
 
-        // Verifica se os cards das assinaturas foram renderizados
         expect(
           find.byType(SubscriptionCard),
           findsNWidgets(fakeSubscriptions.length),
@@ -198,14 +176,12 @@ void main() {
         expect(find.text(fakeSubscription.name), findsOneWidget);
         expect(find.text(fakeSubscriptions[1].name), findsOneWidget);
 
-        // Verifica se o evento LoadSubscriptions foi adicionado
         verify(() => subscriptionBloc.add(const LoadSubscriptions())).called(1);
       });
 
       testWidgets(
         'should display "Nenhuma assinatura encontrada" when list is empty',
         (tester) async {
-          // Configura o AuthBloc para estar autenticado
           when(
             () => authBloc.state,
           ).thenReturn(const AuthSuccess(userEmail: 'test@emp.com'));
@@ -214,7 +190,6 @@ void main() {
             Stream.value(const AuthSuccess(userEmail: 'test@emp.com')),
           );
 
-          // Configura o SubscriptionBloc para emitir SubscriptionLoaded com lista vazia
           when(
             () => subscriptionBloc.state,
           ).thenReturn(const SubscriptionInitial());
@@ -222,37 +197,23 @@ void main() {
             subscriptionBloc,
             Stream.fromIterable([
               const SubscriptionLoading(),
-              const SubscriptionLoaded([]), // Lista vazia
+              const SubscriptionLoaded([]),
             ]),
             initialState: const SubscriptionInitial(),
           );
 
           await tester.pumpWidget(buildTestApp(const SubscriptionsScreen()));
           await tester.pumpAndSettle();
-
-          // Verifica se a mensagem de lista vazia é exibida
           expect(find.text('Nenhuma assinatura encontrada'), findsOneWidget);
-          expect(
-            find.byType(SubscriptionCard),
-            findsNothing,
-          ); // Nenhum card deve ser encontrado
+          expect(find.byType(SubscriptionCard), findsNothing);
         },
       );
-
-
-
     });
 
-    // =======================================================================
-    // 2. SubscriptionDetailScreen (Detalhe da Assinatura)
-    // =======================================================================
     group('SubscriptionDetailScreen', () {
-
-
       testWidgets(
         'should display NotFoundScreen when subscription detail fails to load',
         (tester) async {
-          // Configura o AuthBloc para estar autenticado
           when(
             () => authBloc.state,
           ).thenReturn(const AuthSuccess(userEmail: 'test@emp.com'));
@@ -261,7 +222,6 @@ void main() {
             Stream.value(const AuthSuccess(userEmail: 'test@emp.com')),
           );
 
-          // Configura o SubscriptionBloc para emitir SubscriptionError
           when(
             () => subscriptionBloc.state,
           ).thenReturn(const SubscriptionInitial());
@@ -281,19 +241,11 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Verifica se o NotFoundScreen foi renderizado
           expect(find.byType(NotFoundScreen), findsOneWidget);
 
-          // Verifica se a mensagem de erro está visível
           expect(find.text('Assinatura não encontrada'), findsOneWidget);
-          expect(
-            find.text('Erro de Navegação'),
-            findsOneWidget,
-          ); // Título da AppBar do NotFoundScreen
-          expect(
-            find.byIcon(Icons.search_off),
-            findsOneWidget,
-          ); // Ícone customizado para NotFoundScreen
+          expect(find.text('Erro de Navegação'), findsOneWidget);
+          expect(find.byIcon(Icons.search_off), findsOneWidget);
           expect(
             find.widgetWithText(ElevatedButton, 'Voltar para a lista'),
             findsOneWidget,
@@ -302,75 +254,63 @@ void main() {
       );
     });
 
-    // =======================================================================
-    // 3. LoginScreen (Tela de Login)
-    // =======================================================================
     group('LoginScreen', () {
       testWidgets('should display LoginHeader and LoginForm', (tester) async {
-        // Configura o AuthBloc para estar no estado inicial
         when(() => authBloc.state).thenReturn(const AuthInitial());
         whenListen(authBloc, Stream.value(const AuthInitial()));
 
         await tester.pumpWidget(buildTestApp(const LoginScreen()));
         await tester.pumpAndSettle();
 
-        // Verifica se o LoginHeader está presente
         expect(find.byType(LoginHeader), findsOneWidget);
         expect(find.text('Bem-vindo!'), findsOneWidget);
 
-        // Verifica se o LoginForm está presente
         expect(find.byType(LoginForm), findsOneWidget);
-        expect(find.byType(TextFormField), findsNWidgets(2)); // Email e Senha
+        expect(find.byType(TextFormField), findsNWidgets(2));
         expect(find.text('Entrar'), findsOneWidget);
       });
 
-      testWidgets('should display SnackBar and error message when login fails', (
-        tester,
-      ) async {
-        // Configura o AuthBloc para emitir AuthFailure
-        when(() => authBloc.state).thenReturn(const AuthInitial());
-        whenListen(
-          authBloc,
-          Stream.fromIterable([
-            const AuthInitial(),
-            const AuthLoading(),
-            const AuthFailure(
-              message: 'Credenciais inválidas. Verifique email e senha.',
-            ),
-          ]),
-          initialState: const AuthInitial(),
-        );
+      testWidgets(
+        'should display SnackBar and error message when login fails',
+        (tester) async {
+          when(() => authBloc.state).thenReturn(const AuthInitial());
+          whenListen(
+            authBloc,
+            Stream.fromIterable([
+              const AuthInitial(),
+              const AuthLoading(),
+              const AuthFailure(
+                message: 'Credenciais inválidas. Verifique email e senha.',
+              ),
+            ]),
+            initialState: const AuthInitial(),
+          );
 
-        await tester.pumpWidget(buildTestApp(const LoginScreen()));
-        await tester.pumpAndSettle();
+          await tester.pumpWidget(buildTestApp(const LoginScreen()));
+          await tester.pumpAndSettle();
 
-        // Simula a entrada de texto e o tap no botão de login
-        await tester.enterText(
-          find.byType(TextFormField).first,
-          'wrong@email.com',
-        );
-        await tester.enterText(find.byType(TextFormField).last, 'wrong');
-        await tester.tap(find.text('Entrar'));
-        await tester.pump(); // Processa o tap e o AuthLoading
+          await tester.enterText(
+            find.byType(TextFormField).first,
+            'wrong@email.com',
+          );
+          await tester.enterText(find.byType(TextFormField).last, 'wrong');
+          await tester.tap(find.text('Entrar'));
+          await tester.pump(); 
 
-        // Aguarda o SnackBar aparecer e a UI se estabilizar após o AuthFailure
-        // Um pumpAndSettle sem duração pode ser suficiente se o SnackBar for rápido,
-        // mas um pequeno delay pode ser necessário dependendo da animação.
-        await tester.pumpAndSettle(const Duration(milliseconds: 500));
+          await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
-        // Verifica se o SnackBar foi renderizado
-        expect(find.byType(SnackBar), findsOneWidget);
-        expect(
-          find.text('Credenciais inválidas. Verifique email e senha.'),
-          findsWidgets,
-        ); // SnackBar e texto abaixo do form
+          expect(find.byType(SnackBar), findsOneWidget);
+          expect(
+            find.text('Credenciais inválidas. Verifique email e senha.'),
+            findsWidgets,
+          );
 
-        // Verifica se a mensagem de erro também aparece abaixo do formulário
-        expect(
-          find.text('Credenciais inválidas. Verifique email e senha.'),
-          findsWidgets,
-        );
-      });
+          expect(
+            find.text('Credenciais inválidas. Verifique email e senha.'),
+            findsWidgets,
+          );
+        },
+      );
     });
   });
 }

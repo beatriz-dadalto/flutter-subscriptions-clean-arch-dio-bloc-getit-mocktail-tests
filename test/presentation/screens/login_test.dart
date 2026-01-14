@@ -19,7 +19,6 @@ void main() {
   late MockSubscriptionBloc subscriptionBloc;
 
   setUpAll(() {
-    // Registra os fallbacks para any<T>() que são usados em verify
     registerFallbackValue(const LoginRequested(email: '', password: ''));
     registerFallbackValue(const AuthCheckRequested());
     registerFallbackValue(const LogoutRequested());
@@ -29,8 +28,6 @@ void main() {
     authBloc = MockAuthBloc();
     subscriptionBloc = MockSubscriptionBloc();
 
-    // Desregistra e registra os mocks como SINGLETONS no GetIt.
-    // Isso garante que TODAS as chamadas a getIt<Bloc>() retornem a MESMA instância.
     if (getIt.isRegistered<AuthBloc>()) {
       getIt.unregister<AuthBloc>();
     }
@@ -40,12 +37,9 @@ void main() {
     getIt.registerSingleton<AuthBloc>(authBloc);
     getIt.registerSingleton<SubscriptionBloc>(subscriptionBloc);
 
-    // Mocka o close() dos BLoCs para evitar erros de dispose
-    // O MockBloc já implementa close(), então apenas garantimos que não haja erro.
     when(() => authBloc.close()).thenAnswer((_) async {});
     when(() => subscriptionBloc.close()).thenAnswer((_) async {});
 
-    // Ajusta o tamanho da janela do teste para Flutter 3.9+
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     binding.platformDispatcher.views.first.physicalSize = const Size(
       1200,
@@ -55,17 +49,14 @@ void main() {
   });
 
   tearDown(() {
-    // Limpa o tamanho da janela do teste
     final binding = TestWidgetsFlutterBinding.ensureInitialized();
     binding.platformDispatcher.views.first.resetPhysicalSize();
     binding.platformDispatcher.views.first.resetDevicePixelRatio();
 
-    // Garante que os BLoCs sejam fechados após cada teste
     authBloc.close();
     subscriptionBloc.close();
   });
 
-  /// Widget auxiliar para construir o app de teste
   Widget buildTestApp(GoRouter router) {
     return MultiBlocProvider(
       providers: [
@@ -77,7 +68,6 @@ void main() {
   }
 
   group('Login Tests', () {
-
     testWidgets(
       'should block navigation to subscriptions without authentication',
       (tester) async {
@@ -138,7 +128,6 @@ void main() {
       router.go(AppRouter.login);
       await tester.pump(const Duration(seconds: 2));
       expect(find.text('Assinaturas'), findsOneWidget);
-      // Não verifica mais 'Bem-vindo!' pois navegação já ocorreu
     });
   });
 }

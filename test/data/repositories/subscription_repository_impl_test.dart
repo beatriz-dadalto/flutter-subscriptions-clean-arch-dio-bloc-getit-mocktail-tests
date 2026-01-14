@@ -20,7 +20,6 @@ void main() {
   });
 
   group('SubscriptionRepositoryImpl', () {
-    // Test data - Models (como vem do DataSource)
     final testModels = [
       const SubscriptionModel(
         identifier: IdentifierModel(slug: 'sub-1'),
@@ -48,15 +47,12 @@ void main() {
       test(
         'should return List<Subscription> when datasource call is successful',
         () async {
-          // Arrange
           when(
             () => remoteDataSource.getSubscriptions(),
           ).thenAnswer((_) async => testModels);
 
-          // Act
           final result = await repository.getSubscriptions();
 
-          // Assert
           expect(result.isRight(), true);
           result.fold((failure) => fail('Should be Right'), (subscriptions) {
             expect(subscriptions.length, 2);
@@ -70,15 +66,12 @@ void main() {
       test(
         'should return ServerFailure when ServerException is thrown',
         () async {
-          // Arrange
           when(() => remoteDataSource.getSubscriptions()).thenThrow(
             const ServerException(message: 'Internal error', statusCode: 500),
           );
 
-          // Act
           final result = await repository.getSubscriptions();
 
-          // Assert
           expect(result.isLeft(), true);
           result.fold((failure) {
             expect(failure, isA<ServerFailure>());
@@ -90,15 +83,12 @@ void main() {
       test(
         'should return ServerFailure when ParseException is thrown',
         () async {
-          // Arrange
           when(
             () => remoteDataSource.getSubscriptions(),
           ).thenThrow(const ParseException('Invalid JSON'));
 
-          // Act
           final result = await repository.getSubscriptions();
 
-          // Assert
           expect(result.isLeft(), true);
           result.fold((failure) {
             expect(failure, isA<ServerFailure>());
@@ -108,15 +98,12 @@ void main() {
       );
 
       test('should return UnknownFailure for unexpected exceptions', () async {
-        // Arrange
         when(
           () => remoteDataSource.getSubscriptions(),
         ).thenThrow(Exception('Unexpected'));
 
-        // Act
         final result = await repository.getSubscriptions();
 
-        // Assert
         expect(result.isLeft(), true);
         result.fold(
           (failure) => expect(failure, isA<UnknownFailure>()),
@@ -125,15 +112,12 @@ void main() {
       });
 
       test('should return empty list when datasource returns empty', () async {
-        // Arrange
         when(
           () => remoteDataSource.getSubscriptions(),
         ).thenAnswer((_) async => []);
 
-        // Act
         final result = await repository.getSubscriptions();
 
-        // Assert
         expect(result.isRight(), true);
         result.fold(
           (_) => fail('Should be Right'),
@@ -144,15 +128,12 @@ void main() {
 
     group('getSubscriptionBySlug', () {
       test('should return Subscription when found by slug', () async {
-        // Arrange
         when(
           () => remoteDataSource.getSubscriptions(),
         ).thenAnswer((_) async => testModels);
 
-        // Act
         final result = await repository.getSubscriptionBySlug('sub-1');
 
-        // Assert
         expect(result.isRight(), true);
         result.fold((_) => fail('Should be Right'), (subscription) {
           expect(subscription.slug, 'sub-1');
@@ -161,15 +142,12 @@ void main() {
       });
 
       test('should return NotFoundFailure when slug not found', () async {
-        // Arrange
         when(
           () => remoteDataSource.getSubscriptions(),
         ).thenAnswer((_) async => testModels);
 
-        // Act
         final result = await repository.getSubscriptionBySlug('non-existent');
 
-        // Assert
         expect(result.isLeft(), true);
         result.fold((failure) {
           expect(failure, isA<NotFoundFailure>());
