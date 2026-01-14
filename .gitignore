@@ -1,0 +1,84 @@
+# =============================================================================
+# General Files to Ignore
+# =============================================================================
+# Miscellaneous operating system files
+.DS_Store
+.vscode/          # Generally recommended to ignore, unless specific launch configs are shared.
+.idea/            # IntelliJ/Android Studio project files.
+*.iml             # IntelliJ module files.
+*.ipr             # IntelliJ project files.
+*.iws             # IntelliJ workspace files.
+*.log             # Log files.
+*.swp             # Vim swap files.
+.history          # VS Code Local History.
+migrate_working_dir/ # Potentially from migration tools.
+
+# =============================================================================
+# Flutter/Dart/Pub Specific Files to Ignore
+# =============================================================================
+# Generated build artifacts
+/build/
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/       # Pub package cache.
+.pub/             # Pub-related files.
+**/doc/api/       # Generated API documentation.
+/coverage/        # Code coverage reports.
+
+# Android specific build artifacts
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/.gradle/
+/android/local.properties
+/android/key.properties
+/android/build/
+/android/captures/
+/android/app/build/
+/android/app/.cxx/
+/android/app/src/main/assets/flutter_assets/ # Generated assets for Android.
+/android/app/src/main/kotlin/ # Generated Kotlin files (if using older Flutter versions)
+
+# iOS specific build artifacts
+/ios/Flutter/.last_build_id
+/ios/.symlinks/
+/ios/Pods/
+/ios/.generated/
+/ios/build/
+/ios/*.xcworkspace/ # Xcode workspace (can be regenerated).
+/ios/*.xcodeproj/xcuserdata/ # User-specific Xcode data.
+/ios/*.xcodeproj/project.xcworkspace/ # Project workspace.
+/ios/*.xcodeproj/project.xcsettings # Project settings.
+/ios/*.xcodeproj/xcshareddata/ # Shared Xcode data (optional, depends on team preference).
+/ios/Runner.xcworkspace/xcuserdata/ # User-specific Runner workspace data.
+/ios/Runner.xcworkspace/xcshareddata/ # Shared Runner workspace data (optional).
+
+# Web specific build artifacts
+/web/build/
+
+# Linux specific build artifacts
+/linux/build/
+
+# macOS specific build artifacts
+/macos/build/
+
+# Windows specific build artifacts
+/windows/build/
+
+# Fuchsia specific build artifacts
+/fuchsia/build/
+
+# Symbolication and Obfuscation related files
+app.*.symbols
+app.*.map.json
+
+# =============================================================================
+# Sensitive / Local Configuration Files to Ignore
+# =============================================================================
+# Environment variables (e.g., .env files)
+.env
+.env.*
+# If you use a specific file for local configuration that shouldn't be committed
+# e.g., a file with API keys or local database paths.
+# config/local_config.dart
+# lib/secrets.dart
