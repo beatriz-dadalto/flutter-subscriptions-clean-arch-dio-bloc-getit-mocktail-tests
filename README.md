@@ -4,7 +4,7 @@ Este app Flutter com Clean Architecture, BLoC, Get it, Sharedpreferences, testes
 
 **Objetivo:** Mostrar minha capacidade de trabalhar com código escalável, modular e testável para aplicações de grande porte.
 
-## Demonstração
+## Demonstração (play)
 <img src="https://github.com/beatriz-dadalto/flutter-subscriptions-clean-arch-dio-bloc-getit-mocktail-tests/blob/main/app-empiricus-subscriptions.gif" width="370px" alt="demo-image"/>
 
 ---
@@ -38,11 +38,12 @@ Este app Flutter com Clean Architecture, BLoC, Get it, Sharedpreferences, testes
 ### Habilidades demonstradas para demonstrar domínio técnico, atenção à UX e preparo para desafios reais em Flutter:
 
 - Testes automatizados cobrindo lógica e UI
+- Fpdart para **tratamento funcional de erros** proporcionando clareza no fluxo de erros e código mais seguro.
 - Organização
-- Boas práticas de engenharia (SOLID, DI, separação de camadas)
+- Boas práticas de engenharia **(SOLID, DI, separação de camadas)**
 - Clean Architecture (camadas: presentation, domain, data, core)
 - Gerenciamento de estado reativo com BLoC
-- Consumo de API REST em tempo real
+- Consumo de **API** REST em tempo real
 - Navegação avançada com GoRouter e deeplinks
 - Tratamento visual de erros com SnackBars e NotFoundScreen
 - Persistência de estado com SharedPreferences
